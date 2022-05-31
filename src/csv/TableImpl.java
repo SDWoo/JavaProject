@@ -9,13 +9,16 @@ import java.util.function.Predicate;
 class TableImpl implements Table{
     private String toStr;
     private List<Column> columns;
+    private int headerLength;
 
     @Override
     public String toString() {
 
-        return "<" + getClass().getInterfaces()[0].getName() + "@" + hashCode()+">\n" +
-                "RangeIndex: " +
-                columns.get(0).count();
+        return "<" + getClass().getInterfaces()[0].getName() + "@" + Integer.toHexString(hashCode())+">\n" +
+                "RangeIndex: "+ columns.get(0).count() + " entries, 0 to " + (columns.get(0).count()-1) + "\n"+
+                "Data columns (total " + columns.size() + " columns): \n"
+                ;
+
     }
     // header가 있을 경우 생성자
     public TableImpl(String[] header){
@@ -24,6 +27,7 @@ class TableImpl implements Table{
             Column column = new ColumnImpl(header[i]);
             columns.add(column);
         }
+        headerLength = header.length;
     }
     // header가 없을 경우 생성자
     public TableImpl(int length){
