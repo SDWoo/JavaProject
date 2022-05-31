@@ -9,15 +9,52 @@ import java.util.function.Predicate;
 class TableImpl implements Table{
     private String toStr;
     private List<Column> columns;
-    private int headerLength;
 
     @Override
     public String toString() {
+        String s2, s3, s4;
+        int d=0, in=0, s=0;
+        String answer = "";
+        String  a = "";
+        answer += String.format(" %"+ 2 + "s |", "#");
+        answer += String.format(" %"+ 11 + "s |", "Column");
+        answer += String.format(" %"+ 14 + "s |", "Non-Null Count");
+        answer += "DType \n";
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+            ColumnImpl c = (ColumnImpl) column;
+            s2 = column.getHeader();
+            if(columns.get(i).count() == 0) {
+                s3 = String.valueOf(columns.get(i).count()) + " null";
+            }
+            else {
+                s3 = String.valueOf(columns.get(i).count()) + " non-null";
+            }
+            s4 = c.getType();
+            switch (s4){
+                case "double":
+                    d++;
+                    break;
+                case "int":
+                    in++;
+                    break;
+                case "String":
+                    s++;
+                    break;
+                default:
+                    break;
+            }
+            answer += String.format(" %" + 2 + "d |", i);
+            answer += String.format(" %" + 11 + "s |", s2);
+            answer += String.format(" %" + 14 + "s |", s3);
+            answer += s4 + "\n";
+        }
+        answer += "dtypes: double(" + d + "), int(" + in + "), String(" + s +")";
 
         return "<" + getClass().getInterfaces()[0].getName() + "@" + Integer.toHexString(hashCode())+">\n" +
                 "RangeIndex: "+ columns.get(0).count() + " entries, 0 to " + (columns.get(0).count()-1) + "\n"+
                 "Data columns (total " + columns.size() + " columns): \n"
-                ;
+                + answer;
 
     }
     // header가 있을 경우 생성자
@@ -27,7 +64,6 @@ class TableImpl implements Table{
             Column column = new ColumnImpl(header[i]);
             columns.add(column);
         }
-        headerLength = header.length;
     }
     // header가 없을 경우 생성자
     public TableImpl(int length){

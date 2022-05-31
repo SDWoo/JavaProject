@@ -111,7 +111,9 @@ class ColumnImpl implements Column{
     public long getNullCount() {
         return 0;
     }
-
+    String getType() {
+        return type;
+    }
     @Override
     public long getNumericCount() {
         return 0;
