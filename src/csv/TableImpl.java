@@ -13,7 +13,7 @@ class TableImpl implements Table{
     @Override
     public String toString() {
 
-        return "<" + getClass().getInterfaces()[0].getName() +">\n" +
+        return "<" + getClass().getInterfaces()[0].getName() + "@" + hashCode()+">\n" +
                 "RangeIndex: " +
                 columns.get(0).count();
     }

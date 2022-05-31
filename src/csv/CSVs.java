@@ -26,8 +26,8 @@ public class CSVs {
             readStr = reader.readLine();
             int index = 0;
             while(readStr != null) {
+                // 예외처리
                 readStr = readStr.replace("\"\"", "\"");
-                System.out.println(readStr);
                 item = readStr.split(",");
                 item[3] = item[3].replace("\"", "")+ "," + item[4].substring(0, item[4].length()-1);
                 fixedItem = new String[item.length-1];
@@ -41,12 +41,12 @@ public class CSVs {
                         }
                     }
                 }
-                int tokenLength = fixedItem.length;
+                int fixedLength = fixedItem.length;
 
                 if (readStr.charAt(readStr.length()-1) == ',' )
-                    tokenLength++;
+                    fixedLength++;
 
-                for (int i = 0; i < tokenLength; i++) {
+                for (int i = 0; i < fixedLength; i++) {
                     Column column = table.getColumn(i);
 
                     if (fixedItem.length == i){
