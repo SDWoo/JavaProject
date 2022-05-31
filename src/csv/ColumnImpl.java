@@ -1,16 +1,54 @@
 package csv;
+import java.util.ArrayList;
 import java.util.List;
 
 class ColumnImpl implements Column{
     private int index;
+    private int notNullNumber;
     private String type;
     private String header;
     private List<String> Items;
+
     ColumnImpl(String header){
         this.header = header;
         this.type = "";
         this.index = 0;
+        this.notNullNumber = 0;
+        Items = new ArrayList<String>();
     }
+    ColumnImpl(){
+        this.header = null;
+        this.type = "";
+        this.index = 0;
+        this.notNullNumber = 0;
+        Items = new ArrayList<String>();
+    }
+
+    private boolean isDouble(String num)
+    {
+        try
+        {
+            Double.parseDouble(num);
+            return true;
+        }
+        catch (NumberFormatException e)
+        {
+            return false;
+        }
+    }
+    private boolean isInteger(String num)
+    {
+        try
+        {
+            Integer.parseInt(num);
+            return true;
+        }
+        catch (NumberFormatException e)
+        {
+            return false;
+        }
+    }
+
     @Override
     public String getHeader() {
         return header;
@@ -18,7 +56,7 @@ class ColumnImpl implements Column{
 
     @Override
     public String getValue(int index) {
-        return null;
+        return Items.get(index);
     }
 
     @Override
@@ -28,7 +66,25 @@ class ColumnImpl implements Column{
 
     @Override
     public void setValue(int index, String value) {
+        if(value.isEmpty()){
 
+        }
+        else if(isInteger(value)){
+            notNullNumber += 1;
+            if (!type.equals("String") && !type.equals("double")) {
+                type = "int";
+            }
+        }
+        else if(isDouble(value)){
+            notNullNumber += 1;
+            if (!type.equals("String")) {
+                type = "double";
+            }
+        }else {
+            notNullNumber += 1;
+            type = "String";
+        }
+        Items.add(index, value);
     }
 
     @Override
@@ -38,7 +94,7 @@ class ColumnImpl implements Column{
 
     @Override
     public int count() {
-        return 0;
+        return Items.size();
     }
 
     @Override

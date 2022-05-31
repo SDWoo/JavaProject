@@ -1,22 +1,37 @@
 package csv;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.w3c.dom.ls.LSOutput;
 
 import java.util.function.Predicate;
 
 class TableImpl implements Table{
     private String toStr;
-    private String[] header;
-//    @Override
-//    public String toString() {
-//
-//    }
+    private List<Column> columns;
+
+    @Override
+    public String toString() {
+
+        return "<" + getClass().getInterfaces()[0].getName() +">\n" +
+                "RangeIndex: " +
+                columns.get(0).count();
+    }
     // header가 있을 경우 생성자
     public TableImpl(String[] header){
-        Column column = new ColumnImpl(header[0]);
+        columns = new ArrayList<>();
+        for (int i = 0; i < header.length; i++) {
+            Column column = new ColumnImpl(header[i]);
+            columns.add(column);
+        }
     }
     // header가 없을 경우 생성자
     public TableImpl(int length){
+        columns = new ArrayList<>();
+        for (int i = 0; i < length; i++) {
+            Column column = new ColumnImpl();
+            columns.add(column);
+        }
 
     }
     @Override
@@ -96,7 +111,8 @@ class TableImpl implements Table{
 
     @Override
     public Column getColumn(int index) {
-        return null;
+        Column column = columns.get(index);
+        return column;
     }
 
     @Override

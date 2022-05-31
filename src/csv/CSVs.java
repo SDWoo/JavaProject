@@ -13,7 +13,7 @@ public class CSVs {
         int length;
         String readStr;
         String[] item;
-        String[] fixedItem = new String[12];
+        String[] fixedItem;
         try {
             if (isFirstLineHeader == true) {
                 String[] header = reader.readLine().split(",");
@@ -24,10 +24,13 @@ public class CSVs {
                 table = new TableImpl(str.length);
             }
             readStr = reader.readLine();
+            int index = 0;
             while(readStr != null) {
                 readStr = readStr.replace("\"\"", "\"");
+                System.out.println(readStr);
                 item = readStr.split(",");
-                item[3] = item[3].replace("\"", "") + item[4].substring(0, item[4].length()-1);
+                item[3] = item[3].replace("\"", "")+ "," + item[4].substring(0, item[4].length()-1);
+                fixedItem = new String[item.length-1];
                 for(int i = 0; i<item.length-1; i++) {
                     if(i<4){
                         fixedItem[i] = item[i];
@@ -38,13 +41,25 @@ public class CSVs {
                         }
                     }
                 }
-//
-//                for(String str: fixedItem){
-//                    System.out.print(str + ",");
-//                }
-//                System.out.println();
+                int tokenLength = fixedItem.length;
+
+                if (readStr.charAt(readStr.length()-1) == ',' )
+                    tokenLength++;
+
+                for (int i = 0; i < tokenLength; i++) {
+                    Column column = table.getColumn(i);
+
+                    if (fixedItem.length == i){
+                        column.setValue(index, "");
+                    }
+                    else {
+                        if (fixedItem[i].isEmpty()) { column.setValue(index, ""); }
+                        else { column.setValue(index, fixedItem[i]); }
+                    }
+                }
 
                 readStr = reader.readLine();
+                index++;
             }
         }
 
