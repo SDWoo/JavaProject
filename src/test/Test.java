@@ -22,7 +22,8 @@ public class Test {
 //        3) 테이블을 화면에 출력한다.
 //        table.print();
 
-//        4) 테이블의 컬럼별 통계량을 출력한다.
+//        4) 테이블의 컬럼별 통계량을 출력한다. (count, mean, std, min, 25%, 50%, 75%, max)
+        // 이름 제외, Ticket에서 문자열 제외
 //        table.getStats().print();
 
 //        5) 처음 5줄 출력 (새 테이블)
@@ -50,7 +51,7 @@ public class Test {
 //        anotherTable = table.selectRows(0, 10);
 //        System.out.println("identity test for selectRows(range): " + (table.equals(anotherTable) ? "Fail" : "Pass"));
 
-//        10) 지정한 행 인덱스로만 구성된 서브테이블을 얻는다. (새 테이블)
+//        10) 지정한 행 인덱스로만 구성된 서브테이블을 얻는다. (새 테이블) , 655 "Nora" 처리 조심, null 도
 //        table.selectRowsAt(654, 829, 10, 99).print();
 //        anotherTable = table.selectRowsAt(654, 829);
 //        System.out.println("identity test for selectRowsAt(indices): " + (table.equals(anotherTable) ? "Fail" : "Pass"));

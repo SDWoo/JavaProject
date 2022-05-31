@@ -6,10 +6,19 @@ import java.util.function.Predicate;
 
 class TableImpl implements Table{
     private String toStr;
+    private String[] header;
 //    @Override
 //    public String toString() {
 //
 //    }
+    // header가 있을 경우 생성자
+    public TableImpl(String[] header){
+        Column column = new ColumnImpl(header[0]);
+    }
+    // header가 없을 경우 생성자
+    public TableImpl(int length){
+
+    }
     @Override
     public void print() {
 

@@ -1,9 +1,19 @@
 package csv;
+import java.util.List;
 
 class ColumnImpl implements Column{
+    private int index;
+    private String type;
+    private String header;
+    private List<String> Items;
+    ColumnImpl(String header){
+        this.header = header;
+        this.type = "";
+        this.index = 0;
+    }
     @Override
     public String getHeader() {
-        return null;
+        return header;
     }
 
     @Override

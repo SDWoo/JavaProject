@@ -8,16 +8,50 @@ public class CSVs {
      * @param isFirstLineHeader csv 파일의 첫 라인을 헤더(타이틀)로 처리할까요?
      */
     public static Table createTable(File csv, boolean isFirstLineHeader) throws FileNotFoundException {
-        Table table;
+        Table table = null;
         BufferedReader reader = new BufferedReader(new FileReader(csv));
+        int length;
+        String readStr;
+        String[] item;
+        String[] fixedItem = new String[12];
+        try {
+            if (isFirstLineHeader == true) {
+                String[] header = reader.readLine().split(",");
+                table = new TableImpl(header);
 
-        if (isFirstLineHeader == true ) {
-            
-        }
-        else {
+            } else {
+                String[] str = reader.readLine().split(",");
+                table = new TableImpl(str.length);
+            }
+            readStr = reader.readLine();
+            while(readStr != null) {
+                readStr = readStr.replace("\"\"", "\"");
+                item = readStr.split(",");
+                item[3] = item[3].replace("\"", "") + item[4].substring(0, item[4].length()-1);
+                for(int i = 0; i<item.length-1; i++) {
+                    if(i<4){
+                        fixedItem[i] = item[i];
+                    }
+                    else {
+                        if(item[i+1] != null){
+                            fixedItem[i] = item[i+1];
+                        }
+                    }
+                }
+//
+//                for(String str: fixedItem){
+//                    System.out.print(str + ",");
+//                }
+//                System.out.println();
 
+                readStr = reader.readLine();
+            }
         }
-        return null;
+
+        catch (IOException e){
+            e.printStackTrace();
+        }
+        return table;
     }
 
     /**
