@@ -2,6 +2,8 @@ package csv;
 
 import java.io.*;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CSVs {
     /**
@@ -10,10 +12,9 @@ public class CSVs {
     public static Table createTable(File csv, boolean isFirstLineHeader) throws FileNotFoundException {
         Table table = null;
         BufferedReader reader = new BufferedReader(new FileReader(csv));
-        int length;
         String readStr;
         String[] item;
-        String[] fixedItem;
+        List<String> fixedItem;
         try {
             if (isFirstLineHeader == true) {
                 String[] header = reader.readLine().split(",");
@@ -30,31 +31,29 @@ public class CSVs {
                 readStr = readStr.replace("\"\"", "\"");
                 item = readStr.split(",");
                 item[3] = item[3].replace("\"", "")+ "," + item[4].substring(0, item[4].length()-1);
-                fixedItem = new String[item.length-1];
+                fixedItem = new ArrayList<String>();
                 for(int i = 0; i<item.length-1; i++) {
                     if(i<4){
-                        fixedItem[i] = item[i];
+                        fixedItem.add(item[i]);
                     }
                     else {
                         if(item[i+1] != null){
-                            fixedItem[i] = item[i+1];
+                            fixedItem.add(item[i+1]);
                         }
                     }
                 }
-                int fixedLength = fixedItem.length;
-
                 if (readStr.charAt(readStr.length()-1) == ',' )
-                    fixedLength++;
+                    fixedItem.add("");
 
-                for (int i = 0; i < fixedLength; i++) {
+                for (int i = 0; i < fixedItem.size(); i++) {
                     Column column = table.getColumn(i);
 
-                    if (fixedItem.length == i){
+                    if (fixedItem.size() == i){
                         column.setValue(index, "");
                     }
                     else {
-                        if (fixedItem[i].isEmpty()) { column.setValue(index, ""); }
-                        else { column.setValue(index, fixedItem[i]); }
+                        if (fixedItem.get(i).isEmpty()) { column.setValue(index, ""); }
+                        else { column.setValue(index, fixedItem.get(i)); }
                     }
                 }
 

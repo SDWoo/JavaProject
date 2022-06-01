@@ -1,26 +1,59 @@
 package csv;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 class ColumnImpl implements Column{
     private int index;
     private int notNullNumber;
+    private int numberCount;
     private String type;
     private String header;
     private List<String> Items;
+    private int formatNum;
+    private List<Double> doubles; // mean, std, max, min 을 위함
 
     ColumnImpl(String header){
         this.header = header;
         this.type = "";
         this.index = 0;
         this.notNullNumber = 0;
+        this.numberCount = 0;
         Items = new ArrayList<String>();
+        switch (header) {
+            case "Name":
+                this.formatNum = 70;
+                break;
+            case "Sex":
+                this.formatNum = 6;
+                break;
+            case "Age":
+                this.formatNum = 4;
+                break;
+            case "Ticket":
+                this.formatNum = 18;
+                this.numberCount = 0;
+                break;
+            case "Fare":
+                this.formatNum = 8;
+                break;
+            case "Cabin":
+                this.formatNum = 14;
+                break;
+            case " ":
+                this.formatNum = 2;
+                break;
+            default:
+                this.formatNum = header.length();
+                break;
+        }
     }
     ColumnImpl(){
         this.header = null;
         this.type = "";
         this.index = 0;
         this.notNullNumber = 0;
+        this.numberCount = 0;
         Items = new ArrayList<String>();
     }
 
@@ -48,7 +81,14 @@ class ColumnImpl implements Column{
             return false;
         }
     }
-
+    private static boolean isEmptyOrNull(String str) {
+        if (str != null && !str.isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    int getFormatNum() { return formatNum;}
     @Override
     public String getHeader() {
         return header;
@@ -66,17 +106,19 @@ class ColumnImpl implements Column{
 
     @Override
     public void setValue(int index, String value) {
-        if(value.isEmpty()){
+        if (isEmptyOrNull(value)){
 
         }
         else if(isInteger(value)){
             notNullNumber += 1;
+            numberCount += 1;
             if (!type.equals("String") && !type.equals("double")) {
                 type = "int";
             }
         }
         else if(isDouble(value)){
             notNullNumber += 1;
+            numberCount += 1;
             if (!type.equals("String")) {
                 type = "double";
             }
@@ -94,7 +136,7 @@ class ColumnImpl implements Column{
 
     @Override
     public int count() {
-        return Items.size();
+        return numberCount;
     }
 
     @Override
@@ -104,7 +146,10 @@ class ColumnImpl implements Column{
 
     @Override
     public boolean isNumericColumn() {
-        return false;
+        if (!type.equals("String")) {
+            return true;
+        }
+        else {return false;}
     }
 
     @Override
@@ -116,31 +161,80 @@ class ColumnImpl implements Column{
     }
     @Override
     public long getNumericCount() {
-        return 0;
+        return numberCount;
     }
 
     @Override
     public double getNumericMin() {
-        return 0;
+        double min = 0;
+        if (Items.size() != 0) {
+            doubles = new ArrayList<>();
+
+            for (int i = 0; i < Items.size(); i++) {
+                doubles.add(Double.valueOf(Items.get(i)));
+            }
+            Collections.sort(doubles);
+            min = doubles.get(0);
+            System.out.println(min);
+        }
+        return min;
+
     }
 
     @Override
     public double getNumericMax() {
-        return 0;
+        doubles = new ArrayList<>();
+
+        for (int i =0; i< Items.size(); i++){
+            doubles.add(Double.valueOf(Items.get(i)));
+        }
+        Collections.sort(doubles);
+        double max = doubles.get(doubles.size()-1);
+        System.out.println(max);
+        return max;
     }
 
     @Override
     public double getMean() {
-        return 0;
+
+        double sum = 0;
+        for (int i = 0; i < Items.size(); i++) {
+            try {
+                sum += Double.valueOf(Items.get(i));
+            }
+            catch (NumberFormatException e) {
+                sum += 0.0;
+            }
+        }
+        double mean = sum/numberCount;
+        return mean;
     }
 
     @Override
     public double getStd() {
-        return 0;
+        doubles = new ArrayList<>();
+        double sum = 0;
+        double std = 0;
+        for (int i = 0; i < Items.size(); i++) {
+            doubles.add(Double.valueOf(Items.get(i)));
+            sum += Double.valueOf(Items.get(i));
+        }
+        double mean = sum/numberCount;
+
+        double devSum = 0;
+        for(Double num: doubles){
+            devSum += Math.pow((num - mean),2);
+        }
+        std = Math.sqrt(devSum/numberCount);
+        return std;
     }
 
     @Override
     public double getQ1() {
+        doubles = new ArrayList<>();
+        for (int i = 0; i < Items.size(); i++) {
+            doubles.add(Double.valueOf(Items.get(i)));
+        }
         return 0;
     }
 
