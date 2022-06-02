@@ -6,6 +6,9 @@ import csv.Table;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Test {
     public static void main(String[] args) throws FileNotFoundException {
@@ -20,7 +23,7 @@ public class Test {
 //        System.out.println(table);
 
 //        3) 테이블을 화면에 출력한다.
-        table.print();
+//        table.print();
 
 //        4) 테이블의 컬럼별 통계량을 출력한다. (count, mean, std, min, 25%, 50%, 75%, max)
         // 이름 제외, Ticket에서 문자열 제외

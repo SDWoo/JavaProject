@@ -24,22 +24,6 @@ class ColumnImpl implements Column{
             case "Name":
                 this.formatNum = 70;
                 break;
-            case "Sex":
-                this.formatNum = 6;
-                break;
-            case "Age":
-                this.formatNum = 4;
-                break;
-            case "Ticket":
-                this.formatNum = 18;
-                this.numberCount = 0;
-                break;
-            case "Fare":
-                this.formatNum = 8;
-                break;
-            case "Cabin":
-                this.formatNum = 14;
-                break;
             case " ":
                 this.formatNum = 2;
                 break;
@@ -112,6 +96,7 @@ class ColumnImpl implements Column{
         else if(isInteger(value)){
             notNullNumber += 1;
             numberCount += 1;
+            formatNum = Math.max(formatNum, value.length());
             if (!type.equals("String") && !type.equals("double")) {
                 type = "int";
             }
@@ -119,11 +104,14 @@ class ColumnImpl implements Column{
         else if(isDouble(value)){
             notNullNumber += 1;
             numberCount += 1;
+            formatNum = Math.max(formatNum, value.length());
             if (!type.equals("String")) {
                 type = "double";
             }
+
         }else {
             notNullNumber += 1;
+            formatNum = Math.max(formatNum, value.length());
             type = "String";
         }
         Items.add(index, value);
@@ -167,15 +155,19 @@ class ColumnImpl implements Column{
     @Override
     public double getNumericMin() {
         double min = 0;
+        int a = 0;
         if (Items.size() != 0) {
             doubles = new ArrayList<>();
 
             for (int i = 0; i < Items.size(); i++) {
-                doubles.add(Double.valueOf(Items.get(i)));
+                try {
+                    doubles.add(Double.valueOf(Items.get(i)));
+                }
+                catch (NumberFormatException e){
+                    a++;
+                }
             }
-            Collections.sort(doubles);
-            min = doubles.get(0);
-            System.out.println(min);
+            min = Collections.max(doubles);
         }
         return min;
 
@@ -184,13 +176,16 @@ class ColumnImpl implements Column{
     @Override
     public double getNumericMax() {
         doubles = new ArrayList<>();
-
+        int a = 0;
         for (int i =0; i< Items.size(); i++){
-            doubles.add(Double.valueOf(Items.get(i)));
+            try{
+                doubles.add(Double.valueOf(Items.get(i)));
+            }
+            catch (NumberFormatException e) {
+                a++;
+            }
         }
-        Collections.sort(doubles);
-        double max = doubles.get(doubles.size()-1);
-        System.out.println(max);
+        double max = Collections.min(doubles);
         return max;
     }
 
@@ -216,8 +211,14 @@ class ColumnImpl implements Column{
         double sum = 0;
         double std = 0;
         for (int i = 0; i < Items.size(); i++) {
+            try {
+
             doubles.add(Double.valueOf(Items.get(i)));
             sum += Double.valueOf(Items.get(i));
+            }
+            catch (NumberFormatException e) {
+                sum += 0.0;
+            }
         }
         double mean = sum/numberCount;
 
@@ -232,20 +233,50 @@ class ColumnImpl implements Column{
     @Override
     public double getQ1() {
         doubles = new ArrayList<>();
+        int a = 0;
         for (int i = 0; i < Items.size(); i++) {
-            doubles.add(Double.valueOf(Items.get(i)));
+            try {
+                doubles.add(Double.valueOf(Items.get(i)));
+            }
+            catch (NumberFormatException e) {
+                a++;
+            }
         }
-        return 0;
+        Collections.sort(doubles);
+
+        return doubles.get((doubles.size()/4) - 1);
     }
 
     @Override
     public double getMedian() {
-        return 0;
+        doubles = new ArrayList<>();
+        int a = 0;
+        for (int i = 0; i < Items.size(); i++) {
+            try {
+                doubles.add(Double.valueOf(Items.get(i)));
+            }
+            catch (NumberFormatException e) {
+                a++;
+            }
+        }
+        Collections.sort(doubles);
+        return doubles.get((doubles.size()/2) - 1);
     }
 
     @Override
     public double getQ3() {
-        return 0;
+        doubles = new ArrayList<>();
+        int a = 0;
+        for (int i = 0; i < Items.size(); i++) {
+            try {
+                doubles.add(Double.valueOf(Items.get(i)));
+            }
+            catch (NumberFormatException e) {
+                a++;
+            }
+        }
+        Collections.sort(doubles);
+        return doubles.get((doubles.size()/2) + (doubles.size()/4) - 1);
     }
 
     @Override

@@ -87,7 +87,9 @@ class TableImpl implements Table{
             printStr += String.format(" %" + c.getFormatNum() + "s |", header);
         }
         printStr += "\n";
-        for (int i = 0; i < columns.get(0).count() ; i++) {
+
+        Column values  = getColumn(1);
+        for (int i = 0; i < values.count() ; i++) {
             for (Column column: columns){
                 ColumnImpl c = (ColumnImpl) column;
                 if(column.getValue(i).isEmpty()){
@@ -106,6 +108,8 @@ class TableImpl implements Table{
     @Override
     public Table getStats() {
         String[] newHeader = new String[columns.size()+1];
+
+        // 다른 header들의 정보도 들어있기 때문에 실제 header의 index가 필요함
         List<Integer> realIndex = new ArrayList<>();
         Table statsTable = null;
 
@@ -127,57 +131,58 @@ class TableImpl implements Table{
             fixedNewHeader[i] = newHeader[i];
         }
 
-        for(String str: fixedNewHeader) {
-            System.out.print(str + ",");;
-        }
         statsTable = new TableImpl(fixedNewHeader);
         // 새로운 value 만들기
         for (int i = 0; i < 8; i++) { // low
-            statsTable.getColumn(0).setValue(i, states[i]);
+                statsTable.getColumn(0).setValue(i, states[i]);
             for (int j = 1; j < notNullCount; j++){ // column
-                Column tableColumn = statsTable.getColumn(j);
-                System.out.println(tableColumn.getHeader());;
-                Column column = getColumn(realIndex.get(j)); //
-                switch (i) {
-                    case 0:
-                        tableColumn.setValue(0, String.valueOf(column.getNumericCount()));
-                        break;
-
-                    case 1:
-                        tableColumn.setValue( 1, String.format("%.6f", column.getMean()));
-                        break;
-
-                    case 2:
-                        tableColumn.setValue(i, String.format("%.6f", column.getStd()));
-                        break;
-
-                    case 3:
-                        tableColumn.setValue(i, column.getNumericMin());
-                        break;
-
-                    case 4:
-                        tableColumn.setValue(i, column.getQ1());
-                        break;
-
-                    case 5:
-                        tableColumn.setValue(i, column.getMedian());
-                        break;
-
-                    case 6:
-                        tableColumn.setValue(i, column.getQ3());
-                        break;
-
-                    case 7:
-                        tableColumn.setValue(i, column.getNumericMax());
-                        break;
+//                statsTable.getColumn(0).setValue(i, states[i]);
+                Column tableColumn = statsTable.getColumn(j); // 현재 header로 값을 넣기 위함
+                Column column = getColumn(realIndex.get(j)); // header의 실제 index에서 값을 받아오기 위함
+                // count
+                if(i == 0) {
+                    tableColumn.setValue(0, String.valueOf(column.getNumericCount()));
                 }
+                // mean
+                else if(i == 1) {
+                        tableColumn.setValue(1, String.format("%f", column.getMean()));
+                }
+                // std
+                else if(i == 2) {
+                        tableColumn.setValue(2, String.format("%f", column.getStd()));
+                }
+                // min
+                else if(i == 3) {
+                        tableColumn.setValue(3, String.format("%.1f", column.getNumericMin()));
+                }
+                // 25%
+                else if(i == 4) {
+                        tableColumn.setValue(3, String.format("%.1f", column.getQ1()));
+                }
+                // 50%
+                else if(i == 5) {
+                        tableColumn.setValue(3, String.format("%f", column.getMedian()));
+
+                }
+                // 75%
+                else if(i == 6) {
+                    tableColumn.setValue(3, String.format("%.1f", column.getQ3()));
+                }
+                // max
+                else if(i == 7) {
+                        tableColumn.setValue(3, String.format("%.1f", column.getNumericMax()));
+                }
+
             }
         }
         return statsTable;
     }
 
+    // 5개 가져오기
     @Override
     public Table head() {
+        Table headTable = null;
+
         return null;
     }
 
