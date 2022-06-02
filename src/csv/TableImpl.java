@@ -137,40 +137,40 @@ class TableImpl implements Table{
                 statsTable.getColumn(0).setValue(i, states[i]);
             for (int j = 1; j < notNullCount; j++){ // column
 //                statsTable.getColumn(0).setValue(i, states[i]);
-                Column tableColumn = statsTable.getColumn(j); // 현재 header로 값을 넣기 위함
+                Column inputColumn = statsTable.getColumn(j); // 현재 header로 값을 넣기 위함
                 Column column = getColumn(realIndex.get(j)); // header의 실제 index에서 값을 받아오기 위함
                 // count
                 if(i == 0) {
-                    tableColumn.setValue(0, String.valueOf(column.getNumericCount()));
+                    inputColumn.setValue(0, String.valueOf(column.getNumericCount()));
                 }
                 // mean
                 else if(i == 1) {
-                        tableColumn.setValue(1, String.format("%f", column.getMean()));
+                        inputColumn.setValue(1, String.format("%f", column.getMean()));
                 }
                 // std
                 else if(i == 2) {
-                        tableColumn.setValue(2, String.format("%f", column.getStd()));
+                        inputColumn.setValue(2, String.format("%f", column.getStd()));
                 }
                 // min
                 else if(i == 3) {
-                        tableColumn.setValue(3, String.format("%.1f", column.getNumericMin()));
+                        inputColumn.setValue(3, String.format("%.1f", column.getNumericMin()));
                 }
                 // 25%
                 else if(i == 4) {
-                        tableColumn.setValue(3, String.format("%.1f", column.getQ1()));
+                        inputColumn.setValue(3, String.format("%.1f", column.getQ1()));
                 }
                 // 50%
                 else if(i == 5) {
-                        tableColumn.setValue(3, String.format("%f", column.getMedian()));
+                        inputColumn.setValue(3, String.format("%f", column.getMedian()));
 
                 }
                 // 75%
                 else if(i == 6) {
-                    tableColumn.setValue(3, String.format("%.1f", column.getQ3()));
+                    inputColumn.setValue(3, String.format("%.1f", column.getQ3()));
                 }
                 // max
                 else if(i == 7) {
-                        tableColumn.setValue(3, String.format("%.1f", column.getNumericMax()));
+                        inputColumn.setValue(3, String.format("%.1f", column.getNumericMax()));
                 }
 
             }
@@ -182,43 +182,173 @@ class TableImpl implements Table{
     @Override
     public Table head() {
         Table headTable = null;
+        String[] headers = new String[columns.size()];
 
-        return null;
+        for (int i = 0; i < columns.size(); i++) {
+            headers[i] = columns.get(i).getHeader();
+        }
+
+        headTable = new TableImpl(headers);
+
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < headers.length; j++) {
+                Column InputColumn = headTable.getColumn(j);
+                Column column = getColumn(j);
+                InputColumn.setValue(i, column.getValue(i));
+            }
+        }
+        return headTable;
     }
 
     @Override
     public Table head(int lineCount) {
-        return null;
+        Table headIntTable = null;
+        String[] headers = new String[columns.size()];
+
+        for (int i = 0; i < columns.size(); i++) {
+            headers[i] = columns.get(i).getHeader();
+        }
+
+        headIntTable = new TableImpl(headers);
+
+        for (int i = 0; i < lineCount; i++) {
+            for (int j = 0; j < headers.length; j++) {
+                Column InputColumn = headIntTable.getColumn(j);
+                Column column = getColumn(j);
+                InputColumn.setValue(i, column.getValue(i));
+            }
+        }
+        return headIntTable;
     }
 
     @Override
     public Table tail() {
-        return null;
+        Table tailTable = null;
+        String[] headers = new String[columns.size()];
+
+        for (int i = 0; i < columns.size(); i++) {
+            headers[i] = columns.get(i).getHeader();
+        }
+
+        tailTable = new TableImpl(headers);
+        int index= 0;
+        for (int i = 886; i < 891; i++) {
+            for (int j = 0; j < headers.length; j++) {
+                Column InputColumn = tailTable.getColumn(j);
+                Column column = getColumn(j);
+                InputColumn.setValue(index, column.getValue(i));
+            }
+            index++;
+        }
+        return tailTable;
     }
 
     @Override
     public Table tail(int lineCount) {
-        return null;
+        Table tailIntTable = null;
+        String[] headers = new String[columns.size()];
+
+        for (int i = 0; i < columns.size(); i++) {
+            headers[i] = columns.get(i).getHeader();
+        }
+
+        tailIntTable = new TableImpl(headers);
+        int index= 0;
+        for (int i = 891-lineCount; i < 891; i++) {
+            for (int j = 0; j < headers.length; j++) {
+                Column InputColumn = tailIntTable.getColumn(j);
+                Column column = getColumn(j);
+                InputColumn.setValue(index, column.getValue(i));
+            }
+            index++;
+        }
+        return tailIntTable;
     }
 
     @Override
     public Table selectRows(int beginIndex, int endIndex) {
-        return null;
+        Table selectTable = null;
+        String[] headers = new String[columns.size()];
+
+        for (int i = 0; i < columns.size(); i++) {
+            headers[i] = columns.get(i).getHeader();
+        }
+
+        selectTable = new TableImpl(headers);
+        int index= 0;
+        for (int i = beginIndex; i < endIndex; i++) {
+            for (int j = 0; j < headers.length; j++) {
+                Column InputColumn = selectTable.getColumn(j);
+                Column column = getColumn(j);
+                InputColumn.setValue(index, column.getValue(i));
+            }
+            index++;
+        }
+        return selectTable;
     }
 
     @Override
     public Table selectRowsAt(int... indices) {
-        return null;
+        Table selectAtTable = null;
+        String[] headers = new String[columns.size()];
+
+        for (int i = 0; i < columns.size(); i++) {
+            headers[i] = columns.get(i).getHeader();
+        }
+
+        selectAtTable = new TableImpl(headers);
+        int index= 0;
+        for (int i = 0; i < indices.length; i++) {
+            for (int j = 0; j < headers.length; j++) {
+                Column InputColumn = selectAtTable.getColumn(j);
+                Column column = getColumn(j);
+                InputColumn.setValue(index, column.getValue(indices[i]));
+            }
+            index++;
+        }
+        return selectAtTable;
     }
 
     @Override
     public Table selectColumns(int beginIndex, int endIndex) {
-        return null;
+        Table selectColumnTable = null;
+        String[] headers = new String[endIndex-beginIndex];
+
+        for (int i = beginIndex; i < endIndex; i++) {
+            headers[i] = columns.get(i).getHeader();
+        }
+        selectColumnTable = new TableImpl(headers);
+
+        Column length = getColumn(1);
+        for (int i = 0; i < length.count(); i++) {
+            for (int j = 0; j < headers.length; j++) {
+                Column InputColumn = selectColumnTable.getColumn(j);
+                Column column = getColumn(j);
+                InputColumn.setValue(i, column.getValue(i));
+            }
+        }
+        return selectColumnTable;
     }
 
     @Override
     public Table selectColumnsAt(int... indices) {
-        return null;
+        Table selectColumnAtTable = null;
+        String[] headers = new String[indices.length];
+
+        for (int i = 0; i < indices.length; i++) {
+            headers[i] = columns.get(indices[i]).getHeader();
+        }
+        selectColumnAtTable = new TableImpl(headers);
+
+        Column length = getColumn(1);
+        for (int i = 0; i < length.count(); i++) {
+            for (int j = 0; j < headers.length; j++) {
+                Column InputColumn = selectColumnAtTable.getColumn(j);
+                Column column = getColumn(indices[j]);
+                InputColumn.setValue(i, column.getValue(i));
+            }
+        }
+        return selectColumnAtTable;
     }
 
     @Override
@@ -228,7 +358,14 @@ class TableImpl implements Table{
 
     @Override
     public Table sort(int byIndexOfColumn, boolean isAscending, boolean isNullFirst) {
-        return null;
+        Table sortTable = null;
+        String[] headers = new String[columns.size()];
+
+        for (int i = 0; i < columns.size(); i++) {
+            headers[i] = columns.get(i).getHeader();
+        }
+        sortTable = new TableImpl(headers);
+        return sortTable;
     }
 
     @Override

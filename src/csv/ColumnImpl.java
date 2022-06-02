@@ -24,6 +24,9 @@ class ColumnImpl implements Column{
             case "Name":
                 this.formatNum = 70;
                 break;
+            case "Age":
+                this.formatNum = 4;
+                break;
             case " ":
                 this.formatNum = 2;
                 break;
