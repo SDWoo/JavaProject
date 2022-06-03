@@ -127,7 +127,7 @@ class ColumnImpl implements Column{
 
     @Override
     public int count() {
-        return numberCount;
+        return notNullNumber;
     }
 
     @Override

@@ -20,7 +20,7 @@ public class Test {
         Table table = CSVs.createTable(csv, true);
 
 //        2) TableImpl의 toString()을 override 한다.
-//        System.out.println(table);
+        System.out.println(table);
 
 //        3) 테이블을 화면에 출력한다.
 //        table.print();
@@ -70,9 +70,9 @@ public class Test {
 //        System.out.println("identity test for selectColumnsAt(indices): " + (table.equals(anotherTable) ? "Fail" : "Pass"));
 
 //        11) 테이블을 기준 열인덱스(3)로 정렬한다. 이 때, 오름차순(true), null값은 나중에(false)(원본 테이블 정렬)
-        table.sort(5, true, false).print();
-        anotherTable = table.sort(5, true, false);
-        System.out.println("identity test for sort(index, asc, nullOrder): " + (!table.equals(anotherTable) ? "Fail" : "Pass"));
+//        table.sort(5, true, false).print();
+//        anotherTable = table.sort(5, true, false);
+//        System.out.println("identity test for sort(index, asc, nullOrder): " + (!table.equals(anotherTable) ? "Fail" : "Pass"));
 
 //        12) 테이블을 기준 열인덱스(3)로 정렬한다. 이 때, 내림차순(false), null값은 앞에(true)(새 테이블)
 //        CSVs.sort(table, 10, false, true).print();

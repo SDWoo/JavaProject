@@ -1,5 +1,6 @@
 package csv;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -365,6 +366,48 @@ class TableImpl implements Table{
             headers[i] = columns.get(i).getHeader();
         }
         sortTable = new TableImpl(headers);
+
+        List<ArrayList<String>> result = new ArrayList<>();
+
+        Column length = getColumn(1);
+        for (int i = 0; i < length.count(); i++) {
+            ArrayList<String> row = new ArrayList<>();
+            for (int j = 0; j < headers.length; j++) {
+                Column column1 = getColumn(j);
+                row.add(column1.getValue(i));
+            }
+            result.add(row);
+        }
+        Column c = sortTable.getColumn(byIndexOfColumn);
+
+        Column column = columns.get(byIndexOfColumn);
+        ColumnImpl column1 = (ColumnImpl) column;
+        String type = column1.getType();
+
+
+        result.sort((a,b) -> {
+            // 오름차순
+            if (isAscending) {
+                if (isNullFirst) {
+                    return a.get(byIndexOfColumn).compareTo(b.get(byIndexOfColumn));
+                }else {
+                    if(a.get(byIndexOfColumn).equals("")) {
+                        return -1;
+                    }
+                    else {
+                        return a.get(byIndexOfColumn).compareTo(b.get(byIndexOfColumn));
+                    }
+                }
+
+            }
+            // 내림차순
+            else {
+                return b.get(byIndexOfColumn).compareTo(a.get(byIndexOfColumn));
+            }
+        });
+        for(ArrayList<String> list:result) {
+            System.out.println(list);
+        }
         return sortTable;
     }
 

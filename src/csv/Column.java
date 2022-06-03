@@ -38,7 +38,6 @@ public interface Column {
      * @return int 혹은 double로 평가될 수 있는 cell의 개수
      */
     long getNumericCount();
-
     // 아래 7개 메소드는 String 타입 컬럼에 대해서 수행 시, 예외 발생 시켜라.
     double getNumericMin();
     double getNumericMax();
