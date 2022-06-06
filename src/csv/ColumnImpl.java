@@ -8,9 +8,11 @@ class ColumnImpl implements Column{
     private int notNullNumber;
     private int numberCount;
     private String type;
+    private Class clazz;
     private String header;
     private List<String> Items;
     private int formatNum;
+    private int countItem;
     private List<Double> doubles; // mean, std, max, min 을 위함
 
     ColumnImpl(String header){
@@ -80,6 +82,9 @@ class ColumnImpl implements Column{
     public String getHeader() {
         return header;
     }
+    void makeCountZero() {
+        this.countItem = 0;
+    }
 
     @Override
     public String getValue(int index) {
@@ -93,36 +98,49 @@ class ColumnImpl implements Column{
 
     @Override
     public void setValue(int index, String value) {
-        if (isEmptyOrNull(value)){
 
-        }
-        else if(isInteger(value)){
-            notNullNumber += 1;
-            numberCount += 1;
-            formatNum = Math.max(formatNum, value.length());
-            if (!type.equals("String") && !type.equals("double")) {
-                type = "int";
-            }
-        }
-        else if(isDouble(value)){
-            notNullNumber += 1;
-            numberCount += 1;
-            formatNum = Math.max(formatNum, value.length());
-            if (!type.equals("String")) {
-                type = "double";
-            }
+//            StringBuilder stringBuilder = new StringBuilder(value);
+//            if(value.equals("") || stringBuilder.charAt(stringBuilder.length() -1) == '*') {
+//                if (value.equals("")){
+//                    Items.set(index, value);
+//                }else{
+//                    Items.set(index, value);
+//                }
+//            }
+//            else {
+                if (isEmptyOrNull(value)) {
+                } else if (isInteger(value)) {
+                    notNullNumber += 1;
+                    numberCount += 1;
+                    formatNum = Math.max(formatNum, value.length());
+                    if (!type.equals("String") && !type.equals("double")) {
+                        type = "int";
+                        clazz = Integer.class;
+                    }
+                } else if (isDouble(value)) {
+                    notNullNumber += 1;
+                    numberCount += 1;
+                    formatNum = Math.max(formatNum, value.length());
+                    if (!type.equals("String")) {
+                        type = "double";
+                        clazz = Double.class;
+                    }
 
-        }else {
-            notNullNumber += 1;
-            formatNum = Math.max(formatNum, value.length());
-            type = "String";
-        }
-        Items.add(index, value);
+                } else {
+                    notNullNumber += 1;
+                    formatNum = Math.max(formatNum, value.length());
+                    type = "String";
+                    clazz = String.class;
+                }
+
+                Items.add(index, value);
+//            }
+
     }
 
     @Override
     public <T extends Number> void setValue(int index, T value) {
-
+        Items.set(index, String.valueOf(value));
     }
 
     @Override
@@ -216,8 +234,8 @@ class ColumnImpl implements Column{
         for (int i = 0; i < Items.size(); i++) {
             try {
 
-            doubles.add(Double.valueOf(Items.get(i)));
-            sum += Double.valueOf(Items.get(i));
+                doubles.add(Double.valueOf(Items.get(i)));
+                sum += Double.valueOf(Items.get(i));
             }
             catch (NumberFormatException e) {
                 sum += 0.0;
@@ -248,6 +266,10 @@ class ColumnImpl implements Column{
         Collections.sort(doubles);
 
         return doubles.get((doubles.size()/4) - 1);
+    }
+
+    Class getClazz() {
+        return clazz;
     }
 
     @Override

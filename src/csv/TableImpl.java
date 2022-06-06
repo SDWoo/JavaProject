@@ -2,6 +2,7 @@ package csv;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import com.sun.security.jgss.GSSUtil;
@@ -135,7 +136,7 @@ class TableImpl implements Table{
         statsTable = new TableImpl(fixedNewHeader);
         // 새로운 value 만들기
         for (int i = 0; i < 8; i++) { // low
-                statsTable.getColumn(0).setValue(i, states[i]);
+            statsTable.getColumn(0).setValue(i, states[i]);
             for (int j = 1; j < notNullCount; j++){ // column
 //                statsTable.getColumn(0).setValue(i, states[i]);
                 Column inputColumn = statsTable.getColumn(j); // 현재 header로 값을 넣기 위함
@@ -146,23 +147,23 @@ class TableImpl implements Table{
                 }
                 // mean
                 else if(i == 1) {
-                        inputColumn.setValue(1, String.format("%f", column.getMean()));
+                    inputColumn.setValue(1, String.format("%f", column.getMean()));
                 }
                 // std
                 else if(i == 2) {
-                        inputColumn.setValue(2, String.format("%f", column.getStd()));
+                    inputColumn.setValue(2, String.format("%f", column.getStd()));
                 }
                 // min
                 else if(i == 3) {
-                        inputColumn.setValue(3, String.format("%.1f", column.getNumericMin()));
+                    inputColumn.setValue(3, String.format("%.1f", column.getNumericMin()));
                 }
                 // 25%
                 else if(i == 4) {
-                        inputColumn.setValue(3, String.format("%.1f", column.getQ1()));
+                    inputColumn.setValue(3, String.format("%.1f", column.getQ1()));
                 }
                 // 50%
                 else if(i == 5) {
-                        inputColumn.setValue(3, String.format("%f", column.getMedian()));
+                    inputColumn.setValue(3, String.format("%f", column.getMedian()));
 
                 }
                 // 75%
@@ -171,7 +172,7 @@ class TableImpl implements Table{
                 }
                 // max
                 else if(i == 7) {
-                        inputColumn.setValue(3, String.format("%.1f", column.getNumericMax()));
+                    inputColumn.setValue(3, String.format("%.1f", column.getNumericMax()));
                 }
 
             }
@@ -366,47 +367,88 @@ class TableImpl implements Table{
             headers[i] = columns.get(i).getHeader();
         }
         sortTable = new TableImpl(headers);
-
         List<ArrayList<String>> result = new ArrayList<>();
 
         Column length = getColumn(1);
         for (int i = 0; i < length.count(); i++) {
             ArrayList<String> row = new ArrayList<>();
+
             for (int j = 0; j < headers.length; j++) {
-                Column column1 = getColumn(j);
-                row.add(column1.getValue(i));
+                row.add(getColumn(j).getValue(i));
             }
+
             result.add(row);
         }
-        Column c = sortTable.getColumn(byIndexOfColumn);
 
-        Column column = columns.get(byIndexOfColumn);
-        ColumnImpl column1 = (ColumnImpl) column;
-        String type = column1.getType();
+        ColumnImpl column = (ColumnImpl) columns.get(byIndexOfColumn);
+        Class clazz = column.getClazz();
 
-
-        result.sort((a,b) -> {
-            // 오름차순
-            if (isAscending) {
+        if (isAscending) {
+            result.sort((a, b) -> {
                 if (isNullFirst) {
-                    return a.get(byIndexOfColumn).compareTo(b.get(byIndexOfColumn));
-                }else {
-                    if(a.get(byIndexOfColumn).equals("")) {
-                        return -1;
-                    }
-                    else {
+                    if (clazz.equals(String.class)) {
                         return a.get(byIndexOfColumn).compareTo(b.get(byIndexOfColumn));
+                    } else if (clazz.equals(Double.class)) {
+                        double v = Double.parseDouble(a.get(byIndexOfColumn) == "" ? "0" : a.get(byIndexOfColumn));
+                        double s = Double.parseDouble(b.get(byIndexOfColumn) == "" ? "0" : b.get(byIndexOfColumn));
+                        return Double.compare(v, s);
+                    } else if (clazz.equals(Integer.class)) {
+                        int v = Integer.parseInt(a.get(byIndexOfColumn) == "" ? "0" : a.get(byIndexOfColumn));
+                        int s = Integer.parseInt(b.get(byIndexOfColumn) == "" ? "0" : b.get(byIndexOfColumn));
+                        return Integer.compare(v, s);
+                    }
+                } else {
+                    if (clazz.equals(String.class)) {
+                        return a.get(byIndexOfColumn).compareTo(b.get(byIndexOfColumn));
+                    } else if (clazz.equals(Double.class)) {
+                        double v = Double.parseDouble(a.get(byIndexOfColumn) == "" ? String.valueOf(Double.MAX_VALUE) : a.get(byIndexOfColumn));
+                        double s = Double.parseDouble(b.get(byIndexOfColumn) == "" ? String.valueOf(Double.MAX_VALUE) : b.get(byIndexOfColumn));
+                        return Double.compare(v, s);
+                    } else if (clazz.equals(Integer.class)) {
+                        int v = Integer.parseInt(a.get(byIndexOfColumn) == "" ? "0" : a.get(byIndexOfColumn));
+                        int s = Integer.parseInt(b.get(byIndexOfColumn) == "" ? "0" : b.get(byIndexOfColumn));
+                        return Integer.compare(v, s);
                     }
                 }
-
+                return 0;
+            });
+        }else{
+            result.sort((b, a) -> {
+                if (!isNullFirst) {
+                    if (clazz.equals(String.class)) {
+                        return a.get(byIndexOfColumn).compareTo(b.get(byIndexOfColumn));
+                    } else if (clazz.equals(Double.class)) {
+                        double v = Double.parseDouble(a.get(byIndexOfColumn) == "" ? "0" : a.get(byIndexOfColumn));
+                        double s = Double.parseDouble(b.get(byIndexOfColumn) == "" ? "0" : b.get(byIndexOfColumn));
+                        return Double.compare(v, s);
+                    } else if (clazz.equals(Integer.class)) {
+                        int v = Integer.parseInt(a.get(byIndexOfColumn) == "" ? "0" : a.get(byIndexOfColumn));
+                        int s = Integer.parseInt(b.get(byIndexOfColumn) == "" ? "0" : b.get(byIndexOfColumn));
+                        return Integer.compare(v, s);
+                    }
+                } else {
+                    if (clazz.equals(String.class)) {
+                        return a.get(byIndexOfColumn).compareTo(b.get(byIndexOfColumn));
+                    } else if (clazz.equals(Double.class)) {
+                        double v = Double.parseDouble(a.get(byIndexOfColumn) == "" ? String.valueOf(Double.MAX_VALUE) : a.get(byIndexOfColumn));
+                        double s = Double.parseDouble(b.get(byIndexOfColumn) == "" ? String.valueOf(Double.MAX_VALUE) : b.get(byIndexOfColumn));
+                        return Double.compare(v, s);
+                    } else if (clazz.equals(Integer.class)) {
+                        int v = Integer.parseInt(a.get(byIndexOfColumn) == "" ? String.valueOf(Integer.MAX_VALUE) : a.get(byIndexOfColumn));
+                        int s = Integer.parseInt(b.get(byIndexOfColumn) == "" ? String.valueOf(Integer.MAX_VALUE) : b.get(byIndexOfColumn));
+                        return Integer.compare(v, s);
+                    }
+                }
+                return 0;
+            });
+        }
+        System.out.println(length.count());
+        for (int j = 0; j < columns.size(); j++) {
+            for (int i = 0; i <length.count(); i++) {
+                Column sortColumn = this.getColumn(j);
+                System.out.println(result.get(i).get(j));
+                sortColumn.setValue(i, result.get(i).get(j)+ "*");
             }
-            // 내림차순
-            else {
-                return b.get(byIndexOfColumn).compareTo(a.get(byIndexOfColumn));
-            }
-        });
-        for(ArrayList<String> list:result) {
-            System.out.println(list);
         }
         return sortTable;
     }
@@ -418,12 +460,12 @@ class TableImpl implements Table{
 
     @Override
     public int getRowCount() {
-        return 0;
+        return getColumn(1).count();
     }
 
     @Override
     public int getColumnCount() {
-        return 0;
+        return columns.size();
     }
 
     @Override

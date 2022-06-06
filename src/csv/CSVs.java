@@ -72,7 +72,99 @@ public class CSVs {
      * @return 새로운 Table 객체를 반환한다. 즉, 첫 번째 매개변수 Table은 변경되지 않는다.
      */
     public static Table sort(Table table, int byIndexOfColumn, boolean isAscending, boolean isNullFirst) {
-        return null;
+        Table sortTable = null;
+        String[] headers = new String[table.getColumnCount()];
+
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            headers[i] = table.getColumn(i).getHeader();
+        }
+        sortTable = new TableImpl(headers);
+        List<ArrayList<String>> result = new ArrayList<>();
+
+
+        for (int i = 0; i < table.getRowCount(); i++) {
+            ArrayList<String> row = new ArrayList<>();
+
+            for (int j = 0; j < headers.length; j++) {
+                row.add(table.getColumn(j).getValue(i));
+            }
+
+            result.add(row);
+        }
+        sortTable = new TableImpl(headers);
+        ColumnImpl column = (ColumnImpl) table.getColumn(byIndexOfColumn);
+        Class clazz = column.getClazz();
+
+        if (isAscending) {
+            result.sort((a, b) -> {
+                if (isNullFirst) {
+                    if (clazz.equals(String.class)) {
+                        return a.get(byIndexOfColumn).compareTo(b.get(byIndexOfColumn));
+                    } else if (clazz.equals(Double.class)) {
+                        double v = Double.parseDouble(a.get(byIndexOfColumn) == "" ? "0" : a.get(byIndexOfColumn));
+                        double s = Double.parseDouble(b.get(byIndexOfColumn) == "" ? "0" : b.get(byIndexOfColumn));
+                        return Double.compare(v, s);
+                    } else if (clazz.equals(Integer.class)) {
+                        int v = Integer.parseInt(a.get(byIndexOfColumn) == "" ? "0" : a.get(byIndexOfColumn));
+                        int s = Integer.parseInt(b.get(byIndexOfColumn) == "" ? "0" : b.get(byIndexOfColumn));
+                        return Integer.compare(v, s);
+                    }
+                } else {
+                    if (clazz.equals(String.class)) {
+                        return a.get(byIndexOfColumn).compareTo(b.get(byIndexOfColumn));
+                    } else if (clazz.equals(Double.class)) {
+                        double v = Double.parseDouble(a.get(byIndexOfColumn) == "" ? String.valueOf(Double.MAX_VALUE) : a.get(byIndexOfColumn));
+                        double s = Double.parseDouble(b.get(byIndexOfColumn) == "" ? String.valueOf(Double.MAX_VALUE) : b.get(byIndexOfColumn));
+                        return Double.compare(v, s);
+                    } else if (clazz.equals(Integer.class)) {
+                        int v = Integer.parseInt(a.get(byIndexOfColumn) == "" ? "0" : a.get(byIndexOfColumn));
+                        int s = Integer.parseInt(b.get(byIndexOfColumn) == "" ? "0" : b.get(byIndexOfColumn));
+                        return Integer.compare(v, s);
+                    }
+                }
+                return 0;
+            });
+        }else{
+            result.sort((b, a) -> {
+                if (!isNullFirst) {
+                    if (clazz.equals(String.class)) {
+                        return a.get(byIndexOfColumn).compareTo(b.get(byIndexOfColumn));
+                    } else if (clazz.equals(Double.class)) {
+                        double v = Double.parseDouble(a.get(byIndexOfColumn) == "" ? "0" : a.get(byIndexOfColumn));
+                        double s = Double.parseDouble(b.get(byIndexOfColumn) == "" ? "0" : b.get(byIndexOfColumn));
+                        return Double.compare(v, s);
+                    } else if (clazz.equals(Integer.class)) {
+                        int v = Integer.parseInt(a.get(byIndexOfColumn) == "" ? "0" : a.get(byIndexOfColumn));
+                        int s = Integer.parseInt(b.get(byIndexOfColumn) == "" ? "0" : b.get(byIndexOfColumn));
+                        return Integer.compare(v, s);
+                    }
+                } else {
+                    if (clazz.equals(String.class)) {
+                        String v = String.valueOf(a.get(byIndexOfColumn) == "" ? String.valueOf("Z") : a.get(byIndexOfColumn));
+                        String s = String.valueOf(b.get(byIndexOfColumn) == "" ? String.valueOf("Z") : b.get(byIndexOfColumn));
+                        return v.compareTo(s);
+                    } else if (clazz.equals(Double.class)) {
+                        double v = Double.parseDouble(a.get(byIndexOfColumn) == "" ? String.valueOf(Double.MAX_VALUE) : a.get(byIndexOfColumn));
+                        double s = Double.parseDouble(b.get(byIndexOfColumn) == "" ? String.valueOf(Double.MAX_VALUE) : b.get(byIndexOfColumn));
+                        return Double.compare(v, s);
+                    } else if (clazz.equals(Integer.class)) {
+                        int v = Integer.parseInt(a.get(byIndexOfColumn) == "" ? String.valueOf(Integer.MAX_VALUE) : a.get(byIndexOfColumn));
+                        int s = Integer.parseInt(b.get(byIndexOfColumn) == "" ? String.valueOf(Integer.MAX_VALUE) : b.get(byIndexOfColumn));
+                        return Integer.compare(v, s);
+                    }
+                }
+                return 0;
+            });
+        }
+        System.out.println(table.getRowCount());
+        for (int j = 0; j < table.getColumnCount(); j++) {
+            for (int i = 0; i <table.getRowCount(); i++) {
+                Column sortColumn = sortTable.getColumn(j);
+//                System.out.println(result.get(i).get(j));
+                sortColumn.setValue(i, result.get(i).get(j));
+            }
+        }
+        return sortTable;
     }
 
     /**
