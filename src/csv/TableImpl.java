@@ -1,35 +1,35 @@
 package csv;
 
-import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import com.sun.security.jgss.GSSUtil;
-import org.w3c.dom.ls.LSOutput;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 class TableImpl implements Table{
     private List<Column> columns;
     private String[] states = {"count", "mean", "std", "min", "25%", "50%", "75%", "max"};
-
+    private List<String> headers = new ArrayList<>();
     @Override
     public String toString() {
         String s2, s3, s4;
         int d=0, in=0, s=0;
         String answer = "";
-        String  a = "";
-        answer += String.format(" %"+ 2 + "s |", "#");
-        answer += String.format(" %"+ 11 + "s |", "Column");
-        answer += String.format(" %"+ 14 + "s |", "Non-Null Count");
-        answer += "DType \n";
-        for (int i = 0; i < columns.size(); i++) {
-            Column column = columns.get(i);
-            ColumnImpl c = (ColumnImpl) column;
-            s2 = column.getHeader();
-            if(columns.get(i).count() == 0) {
-                s3 = String.valueOf(columns.get(i).count()) + " null";
+                String  a = "";
+                answer += String.format(" %"+ 2 + "s |", "#");
+                answer += String.format(" %"+ 11 + "s |", "Column");
+                answer += String.format(" %"+ 14 + "s |", "Non-Null Count");
+                answer += "DType \n";
+                for (int i = 0; i < columns.size(); i++) {
+                    Column column = columns.get(i);
+                    ColumnImpl c = (ColumnImpl) column;
+                    s2 = column.getHeader();
+                    if(columns.get(i).count() == 0) {
+                        s3 = String.valueOf(columns.get(i).count()) + " null";
             }
             else {
                 s3 = String.valueOf(columns.get(i).count()) + " non-null";
@@ -67,6 +67,7 @@ class TableImpl implements Table{
         for (int i = 0; i < header.length; i++) {
             Column column = new ColumnImpl(header[i]);
             columns.add(column);
+            headers.add(header[i]);
         }
     }
     // header가 없을 경우 생성자
@@ -90,8 +91,8 @@ class TableImpl implements Table{
         }
         printStr += "\n";
 
-        Column values  = getColumn(1);
-        for (int i = 0; i < values.count() ; i++) {
+
+        for (int i = 0; i < getRowCount() ; i++) {
             for (Column column: columns){
                 ColumnImpl c = (ColumnImpl) column;
                 if(column.getValue(i).isEmpty()){
@@ -147,32 +148,54 @@ class TableImpl implements Table{
                 }
                 // mean
                 else if(i == 1) {
-                    inputColumn.setValue(1, String.format("%f", column.getMean()));
+                    double round = Math.round(column.getMean() * 1_000_000) / 1_000_000.0;
+                    String str = String.valueOf(round);
+
+                    inputColumn.setValue(1, str);
+
                 }
                 // std
                 else if(i == 2) {
-                    inputColumn.setValue(2, String.format("%f", column.getStd()));
+                    double round = Math.round(column.getStd() * 1_000_000) / 1_000_000.0;
+                    String str = String.valueOf(round);
+
+                    inputColumn.setValue(2, str);
                 }
                 // min
                 else if(i == 3) {
-                    inputColumn.setValue(3, String.format("%.1f", column.getNumericMin()));
+                    double round = Math.round(column.getNumericMin() * 1_000_000) / 1_000_000.0;
+                    String str = String.valueOf(round);
+
+                    inputColumn.setValue(3, str);
                 }
                 // 25%
                 else if(i == 4) {
-                    inputColumn.setValue(3, String.format("%.1f", column.getQ1()));
+                    double round = Math.round(column.getQ1() * 1_000_000) / 1_000_000.0;
+                    String str = String.valueOf(round);
+
+                    inputColumn.setValue(4, str);
                 }
                 // 50%
                 else if(i == 5) {
-                    inputColumn.setValue(3, String.format("%f", column.getMedian()));
+                    double round = Math.round(column.getMedian() * 1_000_000) / 1_000_000.0;
+                    String str = String.valueOf(round);
+
+                    inputColumn.setValue(5, str);
 
                 }
                 // 75%
                 else if(i == 6) {
-                    inputColumn.setValue(3, String.format("%.1f", column.getQ3()));
+                    double round = Math.round(column.getQ3() * 1_000_000) / 1_000_000.0;
+                    String str = String.valueOf(round);
+
+                    inputColumn.setValue(6, str);
                 }
                 // max
                 else if(i == 7) {
-                    inputColumn.setValue(3, String.format("%.1f", column.getNumericMax()));
+                    double round = Math.round(column.getNumericMax() * 1_000_000) / 1_000_000.0;
+                    String str = String.valueOf(round);
+
+                    inputColumn.setValue(7, str);
                 }
 
             }
@@ -355,18 +378,60 @@ class TableImpl implements Table{
 
     @Override
     public <T> Table selectRowsBy(String columnName, Predicate<T> predicate) {
-        return null;
-    }
 
-    @Override
-    public Table sort(int byIndexOfColumn, boolean isAscending, boolean isNullFirst) {
-        Table sortTable = null;
+        Table selectedTable = null;
         String[] headers = new String[columns.size()];
 
         for (int i = 0; i < columns.size(); i++) {
             headers[i] = columns.get(i).getHeader();
         }
-        sortTable = new TableImpl(headers);
+        selectedTable = new TableImpl(headers);
+
+        ColumnImpl col = (ColumnImpl) columns.stream()
+                .filter(column -> column.getHeader().equals(columnName))
+                .findAny().get();
+
+        ArrayList<Integer> seqList = new ArrayList<>();
+
+        for (int i = 0; i < col.getItems().size(); i++) {
+            if (col.getClazz().isAssignableFrom(String.class)) {
+                if (predicate.test((T) col.getValue(i))) {
+                    seqList.add(i);
+                }
+            } else {
+                if (!col.getValue(i).equals("")) {
+                    Double floor;
+                    try {
+                        floor = Math.floor(Integer.parseInt(col.getValue(i)));
+                        if (predicate.test((T) (Integer)floor.intValue())) {
+                            seqList.add(i);
+                        }
+                    } catch (Exception e) {
+                        floor = Math.floor(Double.parseDouble(col.getValue(i)));
+                        if (predicate.test((T) floor)) {
+                            seqList.add(i);
+                        }
+                    }
+                }
+            }
+
+        }
+
+        for (int i = 0; i < seqList.size(); i++) {
+            for (int j = 0; j < headers.length; j++) {
+                selectedTable.getColumn(j).setValue(i, this.getColumn(j).getValue(seqList.get(i)));
+            }
+        }
+        return selectedTable;
+    }
+
+    @Override
+    public Table sort(int byIndexOfColumn, boolean isAscending, boolean isNullFirst) {
+        String[] headers = new String[columns.size()];
+
+        for (int i = 0; i < columns.size(); i++) {
+            headers[i] = columns.get(i).getHeader();
+        }
         List<ArrayList<String>> result = new ArrayList<>();
 
         Column length = getColumn(1);
@@ -442,20 +507,34 @@ class TableImpl implements Table{
                 return 0;
             });
         }
-        System.out.println(length.count());
-        for (int j = 0; j < columns.size(); j++) {
-            for (int i = 0; i <length.count(); i++) {
+
+        for (int j = 0; j < headers.length; j++) {
+                ColumnImpl column1 = (ColumnImpl) this.getColumn(j);
+                column1.getItems().clear();
+            for (int i = 0; i <891; i++) {
                 Column sortColumn = this.getColumn(j);
-                System.out.println(result.get(i).get(j));
-                sortColumn.setValue(i, result.get(i).get(j)+ "*");
+                sortColumn.setValue(i, result.get(j).get(i-1));
             }
         }
-        return sortTable;
+        return this;
     }
 
     @Override
     public Table shuffle() {
-        return null;
+        List<Integer> index = new ArrayList<>();
+        for(int i=1; i<getRowCount(); i++) {
+            index.add(i);
+        }
+        Collections.shuffle(index);
+
+
+        for (int i = 0; i < getColumnCount(); i++) {
+            for (int j = 0; j < getRowCount(); j++) {
+                Column shuffleColumn = this.getColumn(i);
+                shuffleColumn.setValue(index.get(j), getColumn(i).getValue(index.get(j)));
+            }
+        }
+        return this;
     }
 
     @Override
@@ -476,27 +555,137 @@ class TableImpl implements Table{
 
     @Override
     public Column getColumn(String name) {
-        return null;
+        System.out.println(name);
+
+        Column column = columns.get(this.headers.indexOf(name));
+        return column;
     }
 
     @Override
     public boolean fillNullWithMean() {
-        return false;
+
+        AtomicBoolean check = new AtomicBoolean(false);
+
+        List<Column> columns = this.columns.stream()
+                .filter(column -> {
+                    ColumnImpl impl = (ColumnImpl) column;
+                    return impl.fillNullWithMean();
+                })
+                .collect(Collectors.toList());
+
+
+        for (int i=0;i<columns.size();i++) {
+            ColumnImpl col = (ColumnImpl) columns.get(i);
+            double mean = col.getMean();
+            int count = 0;
+            for (int j = 0; j < col.getItems().size(); j++) {
+                if (col.getItems().get(j).equals("")) {
+                    check.set(true);
+                    count++;
+                    col.setValue(j, mean);
+                    if (col.getClazz().isAssignableFrom(Integer.class)) {
+                        col.setType("double", Double.class);
+                    }
+                }
+            }
+            col.setNotNullNumber(col.getItems().size() - col.getNullCount() + count);
+
+        }
+
+        return check.get();
     }
 
     @Override
     public boolean fillNullWithZero() {
-        return false;
+        AtomicBoolean check = new AtomicBoolean(false);
+
+        List<Column> columns = this.columns.stream()
+                .filter(column -> {
+                    ColumnImpl impl = (ColumnImpl) column;
+                    return impl.fillNullWithZero();
+                })
+                .collect(Collectors.toList());
+
+
+        for (int i=0;i<columns.size();i++) {
+            ColumnImpl col = (ColumnImpl) columns.get(i);
+            int count = 0;
+            for (int j = 0; j < col.getItems().size(); j++) {
+                if (col.getItems().get(j).equals("")) {
+                    check.set(true);
+                    count++;
+                    col.setValue(j, 0);
+                }
+            }
+            col.setNotNullNumber(col.getItems().size() - col.getNullCount() + count);
+
+        }
+
+        return check.get();
     }
 
     @Override
     public boolean standardize() {
-        return false;
+        AtomicBoolean check = new AtomicBoolean(false);
+
+        List<Column> columns = this.columns.stream()
+                .filter(column -> {
+                    ColumnImpl impl = (ColumnImpl) column;
+                    return impl.standardize();
+                })
+                .collect(Collectors.toList());
+
+
+        for (int i=0;i<columns.size();i++) {
+            ColumnImpl col = (ColumnImpl) columns.get(i);
+            double mean = col.getMean();
+            double std = col.getStd();
+            for (int j = 0; j < col.getItems().size(); j++) {
+                if (!col.getItems().get(j).equals("")) {
+                    check.set(true);
+
+                    col.setValue(j, ((Double.valueOf(col.getValue(j)) - mean) / std));
+                    if (col.getClazz().isAssignableFrom(Integer.class)) {
+                        col.setType("double", Double.class);
+                    }
+                }
+            }
+
+        }
+
+        return check.get();
     }
 
     @Override
     public boolean normalize() {
-        return false;
+        AtomicBoolean check = new AtomicBoolean(false);
+
+        List<Column> columns = this.columns.stream()
+                .filter(column -> {
+                    ColumnImpl impl = (ColumnImpl) column;
+                    return impl.standardize();
+                })
+                .collect(Collectors.toList());
+
+
+        for (int i=0;i<columns.size();i++) {
+            ColumnImpl col = (ColumnImpl) columns.get(i);
+            double min = col.getNumericMin();
+            double max = col.getNumericMax();
+            for (int j = 0; j < col.getItems().size(); j++) {
+                if (!col.getItems().get(j).equals("")) {
+                    check.set(true);
+
+                    col.setValue(j, ((Double.valueOf(col.getValue(j)) - min) / (max-min)));
+                    if (col.getClazz().isAssignableFrom(Integer.class)) {
+                        col.setType("double", Double.class);
+                    }
+                }
+            }
+
+        }
+
+        return check.get();
     }
 
     @Override

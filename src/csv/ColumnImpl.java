@@ -2,6 +2,9 @@ package csv;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.OptionalDouble;
+import java.util.function.Function;
+import java.util.regex.Pattern;
 
 class ColumnImpl implements Column{
     private int index;
@@ -10,10 +13,10 @@ class ColumnImpl implements Column{
     private String type;
     private Class clazz;
     private String header;
-    private List<String> Items;
     private int formatNum;
     private int countItem;
     private List<Double> doubles; // mean, std, max, min 을 위함
+    List<String> Items;
 
     ColumnImpl(String header){
         this.header = header;
@@ -44,6 +47,20 @@ class ColumnImpl implements Column{
         this.notNullNumber = 0;
         this.numberCount = 0;
         Items = new ArrayList<String>();
+    }
+
+    void setNotNullNumber(long count) {
+        this.notNullNumber = Integer.valueOf((int) count);
+
+    }
+
+    public void setType(String type, Class clazz) {
+        this.clazz = clazz;
+        this.type = type;
+    }
+
+    List<String> getItems() {
+        return Items;
     }
 
     private boolean isDouble(String num)
@@ -78,6 +95,7 @@ class ColumnImpl implements Column{
         }
     }
     int getFormatNum() { return formatNum;}
+
     @Override
     public String getHeader() {
         return header;
@@ -93,54 +111,69 @@ class ColumnImpl implements Column{
 
     @Override
     public <T extends Number> T getValue(int index, Class<T> t) {
-        return null;
+        if(Items.get(index) != "") {
+            if (t.getName() == "java.lang.Integer") {
+                Integer item = Integer.parseInt(Items.get(index));
+                return (T) item;
+            } else if (t.getName() == "java.lang.Double") {
+                Double item = Double.parseDouble(Items.get(index));
+                return (T) item;
+            } else {
+                return null;
+            }
+        }
+        else{
+            return null;
+        }
     }
 
     @Override
     public void setValue(int index, String value) {
-
-//            StringBuilder stringBuilder = new StringBuilder(value);
-//            if(value.equals("") || stringBuilder.charAt(stringBuilder.length() -1) == '*') {
-//                if (value.equals("")){
-//                    Items.set(index, value);
-//                }else{
-//                    Items.set(index, value);
-//                }
-//            }
-//            else {
-                if (isEmptyOrNull(value)) {
-                } else if (isInteger(value)) {
-                    notNullNumber += 1;
-                    numberCount += 1;
-                    formatNum = Math.max(formatNum, value.length());
-                    if (!type.equals("String") && !type.equals("double")) {
-                        type = "int";
+        if (isEmptyOrNull(value)) {
+        }
+        else if (isInteger(value)) {
+            notNullNumber += 1;
+            numberCount += 1;
+            formatNum = Math.max(formatNum, value.length());
+            if (!type.equals("String") && !type.equals("double")) {
+                type = "int";
                         clazz = Integer.class;
                     }
-                } else if (isDouble(value)) {
-                    notNullNumber += 1;
-                    numberCount += 1;
-                    formatNum = Math.max(formatNum, value.length());
-                    if (!type.equals("String")) {
-                        type = "double";
-                        clazz = Double.class;
-                    }
-
-                } else {
-                    notNullNumber += 1;
-                    formatNum = Math.max(formatNum, value.length());
-                    type = "String";
-                    clazz = String.class;
-                }
-
+        } else if (isDouble(value)) {
+            notNullNumber += 1;
+            numberCount += 1;
+            formatNum = Math.max(formatNum, value.length());
+            if (!type.equals("String")) {
+                type = "double";
+                clazz = Double.class;
+            }
+        } else {
+            notNullNumber += 1;
+            formatNum = Math.max(formatNum, value.length());
+            type = "String";
+            clazz = String.class;
+        }
+//        try{
+//            Items.get(index);
+//        }catch (Exception e){
+            if (index == this.getItems().size()) {
                 Items.add(index, value);
-//            }
+            } else {
+                Items.set(index, value);
+            }
+//        }
 
     }
 
     @Override
     public <T extends Number> void setValue(int index, T value) {
-        Items.set(index, String.valueOf(value));
+        if (value.getClass().isAssignableFrom(Double.class)) {
+            Items.set(index, String.format("%.6f", value));
+        } else {
+            Items.set(index, String.format("%d",value));
+        }
+        this.formatNum = Math.max(formatNum, String.valueOf(value).length());
+
     }
 
     @Override
@@ -163,7 +196,7 @@ class ColumnImpl implements Column{
 
     @Override
     public long getNullCount() {
-        return 0;
+        return this.Items.size() - this.notNullNumber;
     }
     String getType() {
         return type;
@@ -175,38 +208,34 @@ class ColumnImpl implements Column{
 
     @Override
     public double getNumericMin() {
-        double min = 0;
-        int a = 0;
-        if (Items.size() != 0) {
-            doubles = new ArrayList<>();
+        Double min = Items.stream()
+                .filter(item -> !item.equals(""))
+                .mapToDouble(item -> {
+                    try {
+                        return Double.valueOf(item);
+                    } catch (Exception e) {
+                        return Double.MAX_VALUE;
+                    }
+                })
+                .min().getAsDouble();
 
-            for (int i = 0; i < Items.size(); i++) {
-                try {
-                    doubles.add(Double.valueOf(Items.get(i)));
-                }
-                catch (NumberFormatException e){
-                    a++;
-                }
-            }
-            min = Collections.max(doubles);
-        }
         return min;
 
     }
 
     @Override
     public double getNumericMax() {
-        doubles = new ArrayList<>();
-        int a = 0;
-        for (int i =0; i< Items.size(); i++){
-            try{
-                doubles.add(Double.valueOf(Items.get(i)));
-            }
-            catch (NumberFormatException e) {
-                a++;
-            }
-        }
-        double max = Collections.min(doubles);
+        Double max = Items.stream()
+                .filter(item -> !item.equals(""))
+                .mapToDouble(item -> {
+                    try {
+                        return Double.valueOf(item);
+                    } catch (Exception e) {
+                        return Double.MIN_VALUE;
+                    }
+                })
+                .max().getAsDouble();
+
         return max;
     }
 
@@ -222,7 +251,7 @@ class ColumnImpl implements Column{
                 sum += 0.0;
             }
         }
-        double mean = sum/numberCount;
+        Double mean = sum / numberCount;
         return mean;
     }
 
@@ -303,25 +332,32 @@ class ColumnImpl implements Column{
         Collections.sort(doubles);
         return doubles.get((doubles.size()/2) + (doubles.size()/4) - 1);
     }
+    boolean typeCheck(){
+        boolean check = false;
+        if(this.type == "double" || this.type == "int") {
+            check = true;
+        }
+        return check;
+    }
 
     @Override
     public boolean fillNullWithMean() {
-        return false;
+        return typeCheck();
     }
 
     @Override
     public boolean fillNullWithZero() {
-        return false;
+        return typeCheck();
     }
 
     @Override
     public boolean standardize() {
-        return false;
+        return typeCheck();
     }
 
     @Override
     public boolean normalize() {
-        return false;
+        return typeCheck();
     }
 
     @Override

@@ -3,6 +3,7 @@ package csv;
 import java.io.*;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class CSVs {
@@ -171,6 +172,27 @@ public class CSVs {
      * @return 새로운 Table 객체를 반환한다. 즉, 첫 번째 매개변수 Table은 변경되지 않는다.
      */
     public static Table shuffle(Table table) {
-        return null;
+        Table shuffleTable = null;
+        String[] headers = new String[table.getColumnCount()];
+        List<Integer> index = new ArrayList<>();
+
+        for(int i=0; i< table.getRowCount(); i++) {
+            index.add(i);
+        }
+        Collections.shuffle(index);
+
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            headers[i] = table.getColumn(i).getHeader();
+        }
+        shuffleTable = new TableImpl(headers);
+
+        for (int i = 0; i < table.getRowCount(); i++) {
+            for (int j = 0; j < headers.length; j++) {
+                Column shuffleTableColumn = shuffleTable.getColumn(j);
+                Column existColumn = table.getColumn(j);
+                shuffleTableColumn.setValue(i, existColumn.getValue(index.get(i)));
+            }
+        }
+        return shuffleTable;
     }
 }
