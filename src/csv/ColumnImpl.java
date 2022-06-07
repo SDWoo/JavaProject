@@ -362,6 +362,9 @@ class ColumnImpl implements Column{
 
     @Override
     public boolean factorize() {
+        if(this.getType().equals("String")){
+            return true;
+        }
         return false;
     }
 }

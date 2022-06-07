@@ -522,16 +522,16 @@ class TableImpl implements Table{
     @Override
     public Table shuffle() {
         List<Integer> index = new ArrayList<>();
-        for(int i=1; i<getRowCount(); i++) {
+        for(int i=0; i<getRowCount(); i++) {
             index.add(i);
         }
         Collections.shuffle(index);
-
-
-        for (int i = 0; i < getColumnCount(); i++) {
-            for (int j = 0; j < getRowCount(); j++) {
-                Column shuffleColumn = this.getColumn(i);
-                shuffleColumn.setValue(index.get(j), getColumn(i).getValue(index.get(j)));
+        System.out.println(getRowCount());
+        ColumnImpl indexColumn = (ColumnImpl) getColumn(1);
+        for (int i = 0; i < indexColumn.getItems().size(); i++) {
+            for (int j = 0; j < getColumnCount(); j++) {
+                Column shuffleColumn = this.getColumn(j);
+                shuffleColumn.setValue(i, getColumn(j).getValue(index.get(i)));
             }
         }
         return this;
@@ -690,6 +690,26 @@ class TableImpl implements Table{
 
     @Override
     public boolean factorize() {
-        return false;
+        AtomicBoolean check = new AtomicBoolean(false);
+
+        ColumnImpl col = (ColumnImpl) columns.get(4);
+
+        for (int j = 0; j < col.getItems().size(); j++) {
+            if (!col.getItems().get(j).equals("")) {
+                check.set(true);
+                if(col.getValue(j).equals("male")) {
+                    col.setValue(j, 1);
+                }else if(col.getValue(j).equals("female")){
+                    col.setValue(j, 0);
+                }
+
+
+                if (col.factorize()) {
+                    col.setType("int", Integer.class);
+                }
+            }
+        }
+
+        return check.get();
     }
 }

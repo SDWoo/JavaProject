@@ -81,14 +81,14 @@ public class Test {
 //        System.out.println("identity test for CSVs.sort(index, asc, nullOrder): " + (table.equals(anotherTable) ? "Fail" : "Pass"));
 
 //        13) 테이블을 랜덤하게 섞는다. (원본 테이블은 유지, 랜덤하게 섞인 새 테이블 반환)
-        System.out.println("****************************** before shuffling ******************************");
-        table.print();
-        anotherTable = CSVs.shuffle(table);
-        System.out.println("****************************** after shuffling (copy)******************************");
-        anotherTable.print();
-        System.out.println("****************************** after shuffling (original)******************************");
-        table.print();
-        System.out.println("identity test for CSVs.shuffle(table): " + (table.equals(anotherTable) ? "Fail" : "Pass"));
+//        System.out.println("****************************** before shuffling ******************************");
+//        table.print();
+//        anotherTable = CSVs.shuffle(table);
+//        System.out.println("****************************** after shuffling (copy)******************************");
+//        anotherTable.print();
+//        System.out.println("****************************** after shuffling (original)******************************");
+//        table.print();
+//        System.out.println("identity test for CSVs.shuffle(table): " + (table.equals(anotherTable) ? "Fail" : "Pass"));
 
 //        14) 테이블을 랜덤하게 섞는다. (원본 테이블 섞임)
 //        System.out.println("****************************** before shuffling ******************************");
@@ -136,7 +136,6 @@ public class Test {
 //        System.out.println("table.normalize() = " + table.normalize());
 //        System.out.println("****************************** after normalization ******************************");
 //        table.print();
-//        table.getStats().print();
 
 //        19) (가능한 컬럼에 대하여) table 컬럼마다 값이 {0, 1}로 구성되게 한다. (원본 테이블 값 변경)
 //        System.out.println("****************************** before factorizing ******************************");
@@ -144,6 +143,7 @@ public class Test {
 //        System.out.println("table.factorize() = " + table.factorize());
 //        System.out.println("****************************** after factorizing ******************************");
 //        table.print();
+//        table.getStats().print();
 
 //        20) 조건식을 만족하는 행을 얻는다.
 //        table.selectRowsBy("Name", (String x) -> x.contains("Lee")).print();
